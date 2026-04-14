@@ -1,36 +1,45 @@
-* a web application with a backend and a frontend.
+# App Overview
 
-# notes to agent
-- simple program no need to scale up
-- code should be understadebal to beginers
-- 
+A web application with a backend and a frontend.
+The app lets a user select a patient, watch a video, then mark two points on an image and compare their answer to the correct answer.
 
-# backend
-* backend in rust with a common web framework
+# Notes for the Agent
+- Simple program — no need to scale up
+- Code should be readable and understandable to beginners
 
-* expost a api with the following calls
-  - list_all_pasients() -> list of pasientsname
-  - get_video(pasient_name) -> video
-  - get_image(pasient_name) -> image 
-  - get_answer() ->  cordinats of two points in the image
+# Backend
 
-* data saved in a folder with a data/pasient_name for every pasient it should be a video a image and a answer
+- Written in Rust using Actix-web
+- Data is stored in a `data/` folder, with one subfolder per patient: `data/<patient_name>/`
+- Each patient folder contains:
+  - `video.mp4` — a video file
+  - `image.png` — an image file
+  - `answer.json` — the correct answer (coordinates of two points)
 
+## API Endpoints
 
-# frontend
-* frontend in javascript and html and css
-* call the backend api
+- `GET /patients` → returns a list of patient names
+- `GET /patients/<patient_name>/video` → returns the video file
+- `GET /patients/<patient_name>/image` → returns the image file
+- `GET /patients/<patient_name>/answer` → returns the coordinates of two points as JSON, e.g. `{ "p1": [x, y], "p2": [x, y] }`
 
-## page zero
-  * show list of pasients
-  * click on pasients to show nexst page with data from that pasient
- 
-## page one
-  * show a video 
-  * nexst button to go to nexst page 
-## page two
-  * show a image
-  * select two points and make a line beween them 
-  * nexst pasient button go back to page zero
-  * a reset points button removes the points and result 
-  * a show answer button withs calls get_answer and shows data with another color
+# Frontend
+
+- Written in plain HTML, CSS, and JavaScript
+- Calls the backend API
+
+## Page 0 — Patient List
+- Shows a list of all patients
+- Clicking a patient name navigates to Page 1 for that patient
+
+## Page 1 — Video
+- Shows the patient's video
+- A "Next" button navigates to Page 2
+
+## Page 2 — Image and Answer
+- Shows the patient's image
+- The user can click to place two points on the image; a line is drawn between them
+- Buttons:
+  - **Reset points** — removes the placed points and clears the drawn line
+  - **Show answer** — calls the answer endpoint and draws the correct line in a different color
+  - **Next patient** — goes back to Page 0
