@@ -97,6 +97,13 @@ async function loadImagePage(name) {
   showPage(2);
 }
 
+// Returns Euclidean distance between two points as a percentage of the
+// image diagonal (= the longest possible line in the image, i.e. 100%).
+function distancePct(ax, ay, bx, by) {
+  const dist = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+  return ((dist / canvasImage.naturalWidth) * 100).toFixed(1);
+}
+
 // Redraw everything: image, user points/line, and optionally the answer line.
 function redraw() {
   const canvas = document.getElementById("image-canvas");
@@ -128,6 +135,41 @@ function redraw() {
     drawDot(ctx, p1.x, p1.y);
     drawDot(ctx, p2.x, p2.y);
     drawLine(ctx, p1, p2);
+  }
+
+  // Update distance labels below the canvas
+  updateDistanceDisplay();
+}
+
+function updateDistanceDisplay() {
+  const display = document.getElementById("distance-display");
+  const userLabel = document.getElementById("user-distance");
+  const answerLabel = document.getElementById("answer-distance");
+
+  const hasUserLine = userPoints.length === 2;
+  const hasAnswer = answerPoints !== null;
+
+  if (!hasUserLine && !hasAnswer) {
+    display.classList.add("hidden");
+    return;
+  }
+
+  display.classList.remove("hidden");
+
+  if (hasUserLine) {
+    const pct = distancePct(userPoints[0].x, userPoints[0].y, userPoints[1].x, userPoints[1].y);
+    userLabel.textContent = `Your line: ${pct}%`;
+    userLabel.classList.remove("hidden");
+  } else {
+    userLabel.classList.add("hidden");
+  }
+
+  if (hasAnswer) {
+    const pct = distancePct(answerPoints.p1[0], answerPoints.p1[1], answerPoints.p2[0], answerPoints.p2[1]);
+    answerLabel.textContent = `Answer: ${pct}%`;
+    answerLabel.classList.remove("hidden");
+  } else {
+    answerLabel.classList.add("hidden");
   }
 }
 
