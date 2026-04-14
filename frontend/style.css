@@ -22,14 +22,19 @@ body {
   max-width: 800px;
 }
 
-/* Video and image pages go full width so the media is as large as possible */
+/* Pages 1 and 2 fill the viewport:
+   flex column so title + media + buttons stack, media gets all leftover height */
 #page-1,
 #page-2 {
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px); /* 80px = body padding top + bottom */
 }
 
+/* !important so this beats any ID-level display rules on the same element */
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 h1 {
@@ -57,12 +62,23 @@ h1 {
   background: #e8f0fe;
 }
 
+/* --- Shared media wrapper ---
+   Grows to fill all space between the title and the footer/buttons.
+   The media inside uses max-width/max-height 100% to fill it without overflow. */
+
+.media-wrapper {
+  flex: 1;
+  min-height: 0; /* allows flex item to shrink below its content size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* --- Page 1: video --- */
 
 #video-player {
-  width: 100%;
-  /* Leave ~260px for title, buttons, and padding */
-  max-height: calc(100vh - 260px);
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 6px;
   background: black;
 }
@@ -71,10 +87,7 @@ h1 {
 
 #image-canvas {
   display: block;
-  /* max-width (not width) lets the browser shrink both axes together when
-     max-height is hit, so the aspect-ratio set by JS is always preserved. */
-  max-width: 100%;
-  max-height: calc(100vh - 300px);
+  /* width and height are set by fitCanvas() in JS */
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   cursor: crosshair;
@@ -109,10 +122,6 @@ h1 {
   font-weight: bold;
 }
 
-/* ID selector beats plain .hidden — needs a higher-specificity rule to win */
-#distance-display.hidden {
-  display: none;
-}
 
 #user-distance   { color: #3a6df0; }
 #answer-distance { color: #e74c3c; }
@@ -128,6 +137,7 @@ h1 {
 
 #page-1 .actions {
   justify-content: flex-end;
+  margin-top: 12px;
 }
 
 button {

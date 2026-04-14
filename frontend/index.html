@@ -18,7 +18,9 @@
   <!-- PAGE 1: video -->
   <div id="page-1" class="page hidden">
     <h1 id="video-title"></h1>
-    <video id="video-player" controls></video>
+    <div class="media-wrapper">
+      <video id="video-player" controls></video>
+    </div>
     <div class="actions">
       <button id="btn-to-image">Next →</button>
     </div>
@@ -28,7 +30,9 @@
   <div id="page-2" class="page hidden">
     <h1 id="image-title"></h1>
     <p class="hint">Click on the image to place two points.</p>
-    <canvas id="image-canvas"></canvas>
+    <div class="media-wrapper">
+      <canvas id="image-canvas"></canvas>
+    </div>
     <div class="image-footer">
       <div id="distance-display" class="hidden">
         <span id="user-distance"></span>

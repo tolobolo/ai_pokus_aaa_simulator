@@ -86,11 +86,7 @@ async function loadImagePage(name) {
     const canvas = document.getElementById("image-canvas");
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
-    // Tell the browser the canvas's true aspect ratio so that when CSS
-    // constrains it (e.g. max-height), both dimensions scale together.
-    // Without this, max-height squashes only the height, making scaleX != scaleY
-    // and clicks land in the wrong spot.
-    canvas.style.aspectRatio = `${image.naturalWidth} / ${image.naturalHeight}`;
+    fitCanvas();
     redraw();
   };
 
@@ -103,6 +99,33 @@ function distancePct(ax, ay, bx, by) {
   const dist = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
   return ((dist / canvasImage.naturalWidth) * 100).toFixed(1);
 }
+
+// Set the canvas CSS dimensions to the largest size that fits its wrapper
+// while preserving the image aspect ratio.
+// The canvas pixel coordinate system (canvas.width/height) stays at the
+// image's natural dimensions, so the click scaling math stays correct.
+function fitCanvas() {
+  if (!canvasImage) return;
+
+  const canvas = document.getElementById("image-canvas");
+  const wrapper = canvas.parentElement;
+
+  const wrapperW = wrapper.clientWidth;
+  const wrapperH = wrapper.clientHeight;
+
+  // How much do we need to scale down to fit inside the wrapper?
+  const scale = Math.min(wrapperW / canvasImage.naturalWidth,
+                         wrapperH / canvasImage.naturalHeight);
+
+  canvas.style.width  = Math.round(canvasImage.naturalWidth  * scale) + "px";
+  canvas.style.height = Math.round(canvasImage.naturalHeight * scale) + "px";
+}
+
+// Re-fit the canvas whenever the window is resized
+window.addEventListener("resize", () => {
+  fitCanvas();
+  redraw();
+});
 
 // Redraw everything: image, user points/line, and optionally the answer line.
 function redraw() {
