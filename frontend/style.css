@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+/* Each page is a white card centred on screen */
+.page {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: 32px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.hidden {
+  display: none;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 24px;
+  color: #1a1a2e;
+}
+
+/* --- Page 0: patient list --- */
+
+#patient-list {
+  list-style: none;
+}
+
+#patient-list li {
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#patient-list li:hover {
+  background: #e8f0fe;
+}
+
+/* --- Page 1: video --- */
+
+#video-player {
+  width: 100%;
+  border-radius: 6px;
+  background: black;
+}
+
+/* --- Page 2: canvas --- */
+
+#image-canvas {
+  display: block;
+  max-width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: crosshair;
+}
+
+.hint {
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* --- Shared button row --- */
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #3a6df0;
+  color: white;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #2a5de0;
+}
+
+#btn-reset {
+  background: #888;
+}
+#btn-reset:hover {
+  background: #666;
+}
+
+#btn-next-patient {
+  background: #27ae60;
+}
+#btn-next-patient:hover {
+  background: #1e8e4e;
+}

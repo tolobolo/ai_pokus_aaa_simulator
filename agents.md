@@ -7,8 +7,11 @@ The app lets a user select a patient, watch a video, then mark two points on an 
 - Simple program — no need to scale up
 - Code should be readable and understandable to beginners
 
-# Backend
 
+# Backend
+  - Serves the frontend static files from `../frontend/` at `/`                                                                                                                             
+      so only one server needs to run (`cargo run` in `backend/`)  
+  
 - Written in Rust using Actix-web
 - Data is stored in a `data/` folder, with one subfolder per patient: `data/<patient_name>/`
 - Each patient folder contains:

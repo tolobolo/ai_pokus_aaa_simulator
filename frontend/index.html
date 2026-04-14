@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cecilie Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- PAGE 0: list of patients -->
+  <div id="page-0" class="page">
+    <h1>Patients</h1>
+    <ul id="patient-list"></ul>
+    <p id="no-patients" class="hidden">No patients found. Add folders to <code>data/</code>.</p>
+  </div>
+
+  <!-- PAGE 1: video -->
+  <div id="page-1" class="page hidden">
+    <h1 id="video-title"></h1>
+    <video id="video-player" controls></video>
+    <div class="actions">
+      <button id="btn-to-image">Next →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2: image with point selection -->
+  <div id="page-2" class="page hidden">
+    <h1 id="image-title"></h1>
+    <p class="hint">Click on the image to place two points.</p>
+    <canvas id="image-canvas"></canvas>
+    <div class="actions">
+      <button id="btn-reset">Reset points</button>
+      <button id="btn-show-answer">Show answer</button>
+      <button id="btn-next-patient">Next patient</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-use actix_cors::Cors;
+use actix_files::Files;
 use actix_web::{web, App, HttpServer};
 
 mod handlers;
@@ -15,20 +15,20 @@ async fn main() -> std::io::Result<()> {
     println!("Server running at http://127.0.0.1:8080");
 
     HttpServer::new(move || {
-        // Allow all origins so the frontend (on a different port) can call us
-        let cors = Cors::permissive();
-
         let state = web::Data::new(AppState {
             data_dir: data_dir.clone(),
         });
 
         App::new()
             .app_data(state)
-            .wrap(cors)
+            // API routes
             .route("/patients", web::get().to(handlers::list_patients))
             .route("/patients/{name}/video", web::get().to(handlers::get_video))
             .route("/patients/{name}/image", web::get().to(handlers::get_image))
             .route("/patients/{name}/answer", web::get().to(handlers::get_answer))
+            // Serve the frontend folder at /
+            // index_file("index.html") makes / load index.html automatically
+            .service(Files::new("/", "../frontend").index_file("index.html"))
     })
     .bind("127.0.0.1:8080")?
     .run()
