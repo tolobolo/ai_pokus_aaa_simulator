@@ -86,6 +86,11 @@ async function loadImagePage(name) {
     const canvas = document.getElementById("image-canvas");
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
+    // Tell the browser the canvas's true aspect ratio so that when CSS
+    // constrains it (e.g. max-height), both dimensions scale together.
+    // Without this, max-height squashes only the height, making scaleX != scaleY
+    // and clicks land in the wrong spot.
+    canvas.style.aspectRatio = `${image.naturalWidth} / ${image.naturalHeight}`;
     redraw();
   };
 

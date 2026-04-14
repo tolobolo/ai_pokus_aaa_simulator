@@ -22,6 +22,12 @@ body {
   max-width: 800px;
 }
 
+/* Video and image pages go full width so the media is as large as possible */
+#page-1,
+#page-2 {
+  max-width: 100%;
+}
+
 .hidden {
   display: none;
 }
@@ -55,6 +61,8 @@ h1 {
 
 #video-player {
   width: 100%;
+  /* Leave ~260px for title, buttons, and padding */
+  max-height: calc(100vh - 260px);
   border-radius: 6px;
   background: black;
 }
@@ -63,7 +71,10 @@ h1 {
 
 #image-canvas {
   display: block;
+  /* max-width (not width) lets the browser shrink both axes together when
+     max-height is hit, so the aspect-ratio set by JS is always preserved. */
   max-width: 100%;
+  max-height: calc(100vh - 300px);
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   cursor: crosshair;
