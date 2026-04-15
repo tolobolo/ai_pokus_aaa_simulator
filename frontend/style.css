@@ -93,8 +93,19 @@ h1 {
   cursor: crosshair;
 }
 
-.hint {
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   margin-bottom: 12px;
+}
+
+/* h1 inside the header no longer needs its own bottom margin */
+.page-header h1 {
+  margin-bottom: 0;
+}
+
+.hint {
   color: #555;
   font-size: 0.9rem;
 }
