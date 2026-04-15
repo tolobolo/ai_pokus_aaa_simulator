@@ -150,8 +150,8 @@ function redraw() {
 
   // Draw the answer points and line in red (if "Show answer" was clicked)
   if (answerPoints) {
-    const p1 = { x: answerPoints.p1[0], y: answerPoints.p1[1] };
-    const p2 = { x: answerPoints.p2[0], y: answerPoints.p2[1] };
+    const p1 = { x: answerPoints.x1, y: answerPoints.y1 };
+    const p2 = { x: answerPoints.x2, y: answerPoints.y2 };
     ctx.fillStyle = "#e74c3c";
     ctx.strokeStyle = "#e74c3c";
     ctx.lineWidth = 2;
@@ -188,7 +188,7 @@ function updateDistanceDisplay() {
   }
 
   if (hasAnswer) {
-    const pct = distancePct(answerPoints.p1[0], answerPoints.p1[1], answerPoints.p2[0], answerPoints.p2[1]);
+    const pct = distancePct(answerPoints.x1, answerPoints.y1, answerPoints.x2, answerPoints.y2);
     answerLabel.textContent = `Answer: ${pct}%`;
     answerLabel.classList.remove("hidden");
   } else {
@@ -241,7 +241,7 @@ document.getElementById("btn-reset").addEventListener("click", () => {
 });
 
 document.getElementById("btn-show-answer").addEventListener("click", async () => {
-  const response = await fetch(`${API}/patients/${currentPatient}/answer`);
+  const response = await fetch(`${API}/patients/${currentPatient}/metadata`);
   answerPoints = await response.json();
   redraw();
 });

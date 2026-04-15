@@ -14,10 +14,52 @@ struct PatientList {
     patients: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Answer {
-    pub p1: [f64; 2],
-    pub p2: [f64; 2],
+// -- Structs used to deserialize the nested metadata.json --
+
+#[derive(Deserialize)]
+struct RawMetadata {
+    mhd: RawMhd,
+    calipers: RawCalipers,
+}
+
+#[derive(Deserialize)]
+struct RawMhd {
+    #[serde(rename = "DimSize")]
+    dim_size: String,
+    #[serde(rename = "ElementSpacing")]
+    element_spacing: String,
+}
+
+#[derive(Deserialize)]
+struct RawCalipers {
+    objects: Vec<RawObject>,
+}
+
+#[derive(Deserialize)]
+struct RawObject {
+    calipers: Vec<RawCaliper>,
+}
+
+#[derive(Deserialize)]
+struct RawCaliper {
+    x1: f64,
+    y1: f64,
+    x2: f64,
+    y2: f64,
+    length: f64,
+}
+
+// -- Flat struct that is serialised and returned to the client --
+
+#[derive(Serialize)]
+struct Metadata {
+    x1: f64,
+    y1: f64,
+    x2: f64,
+    y2: f64,
+    length: f64,
+    dim_size: String,
+    element_spacing: String,
 }
 
 // ---------------------------------------------------------------------------
@@ -90,22 +132,39 @@ pub async fn get_image(path: web::Path<String>, state: web::Data<AppState>) -> H
     }
 }
 
-/// GET /patients/{name}/answer
-/// Returns the correct answer as JSON: { "p1": [x, y], "p2": [x, y] }
-pub async fn get_answer(path: web::Path<String>, state: web::Data<AppState>) -> HttpResponse {
+/// GET /patients/{name}/metadata
+/// Parses metadata.json and returns the caliper measurements and image dimensions.
+pub async fn get_metadata(path: web::Path<String>, state: web::Data<AppState>) -> HttpResponse {
     let name = path.into_inner();
     if !is_valid_name(&name) {
         return HttpResponse::BadRequest().body("Invalid patient name");
     }
 
-    let file_path = PathBuf::from(&state.data_dir).join(&name).join("answer.json");
-    match fs::read_to_string(&file_path) {
-        Ok(content) => match serde_json::from_str::<Answer>(&content) {
-            Ok(answer) => HttpResponse::Ok().json(answer),
-            Err(_) => HttpResponse::InternalServerError().body("answer.json has invalid format"),
-        },
-        Err(_) => HttpResponse::NotFound().body(format!("Answer not found for: {name}")),
-    }
+    let file_path = PathBuf::from(&state.data_dir).join(&name).join("metadata.json");
+
+    let content = match fs::read_to_string(&file_path) {
+        Ok(c) => c,
+        Err(_) => return HttpResponse::NotFound().body(format!("Metadata not found for: {name}")),
+    };
+
+    let raw: RawMetadata = match serde_json::from_str(&content) {
+        Ok(r) => r,
+        Err(_) => return HttpResponse::InternalServerError().body("metadata.json has invalid format"),
+    };
+
+    let cal = &raw.calipers.objects[0].calipers[0];
+
+    let metadata = Metadata {
+        x1: cal.x1,
+        y1: cal.y1,
+        x2: cal.x2,
+        y2: cal.y2,
+        length: cal.length,
+        dim_size: raw.mhd.dim_size,
+        element_spacing: raw.mhd.element_spacing,
+    };
+
+    HttpResponse::Ok().json(metadata)
 }
 
 // ---------------------------------------------------------------------------
@@ -144,7 +203,7 @@ mod tests {
                 .route("/patients", web::get().to(list_patients))
                 .route("/patients/{name}/video", web::get().to(get_video))
                 .route("/patients/{name}/image", web::get().to(get_image))
-                .route("/patients/{name}/answer", web::get().to(get_answer)),
+                .route("/patients/{name}/metadata", web::get().to(get_metadata)),
         )
         .await
     }
@@ -157,8 +216,19 @@ mod tests {
         fs::write(format!("{patient}/video.mp4"), b"fake video bytes").unwrap();
         fs::write(format!("{patient}/image.png"), b"fake image bytes").unwrap();
         fs::write(
-            format!("{patient}/answer.json"),
-            r#"{"p1":[100.0,200.0],"p2":[300.0,400.0]}"#,
+            format!("{patient}/metadata.json"),
+            r#"{
+                "mhd": { "DimSize": "100 200", "ElementSpacing": "0.5 0.5" },
+                "calipers": {
+                    "objects": [{
+                        "calipers": [{
+                            "x1": 100.0, "y1": 200.0,
+                            "x2": 300.0, "y2": 400.0,
+                            "length": 219.09
+                        }]
+                    }]
+                }
+            }"#,
         )
         .unwrap();
         dir
@@ -263,30 +333,34 @@ mod tests {
         cleanup(&dir);
     }
 
-    // --- get_answer ---
+    // --- get_metadata ---
 
     #[actix_web::test]
-    async fn test_get_answer_returns_correct_coordinates() {
+    async fn test_get_metadata_returns_correct_coordinates() {
         let dir = make_dir_with_patient();
         let app = make_app(&dir).await;
 
         let req = test::TestRequest::get()
-            .uri("/patients/alice/answer")
+            .uri("/patients/alice/metadata")
             .to_request();
         let body: serde_json::Value = test::call_and_read_body_json(&app, req).await;
 
-        assert_eq!(body["p1"], serde_json::json!([100.0, 200.0]));
-        assert_eq!(body["p2"], serde_json::json!([300.0, 400.0]));
+        assert_eq!(body["x1"], 100.0);
+        assert_eq!(body["y1"], 200.0);
+        assert_eq!(body["x2"], 300.0);
+        assert_eq!(body["y2"], 400.0);
+        assert_eq!(body["dim_size"], "100 200");
+        assert_eq!(body["element_spacing"], "0.5 0.5");
         cleanup(&dir);
     }
 
     #[actix_web::test]
-    async fn test_get_answer_unknown_patient_returns_404() {
+    async fn test_get_metadata_unknown_patient_returns_404() {
         let dir = make_dir_with_patient();
         let app = make_app(&dir).await;
 
         let req = test::TestRequest::get()
-            .uri("/patients/nobody/answer")
+            .uri("/patients/nobody/metadata")
             .to_request();
         let resp = test::call_service(&app, req).await;
 
@@ -304,7 +378,7 @@ mod tests {
         // actix-web will not route a slash inside a path segment, so those get 404.
         // Names with only dots hit our is_valid_name check and return 400.
         for bad_name in &["../secret", "a/b", "a\\b"] {
-            let uri = format!("/patients/{bad_name}/answer");
+            let uri = format!("/patients/{bad_name}/metadata");
             let req = test::TestRequest::get().uri(&uri).to_request();
             let resp = test::call_service(&app, req).await;
             assert!(

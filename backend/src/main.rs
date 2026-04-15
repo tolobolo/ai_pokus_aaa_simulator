@@ -25,7 +25,7 @@ async fn main() -> std::io::Result<()> {
             .route("/patients", web::get().to(handlers::list_patients))
             .route("/patients/{name}/video", web::get().to(handlers::get_video))
             .route("/patients/{name}/image", web::get().to(handlers::get_image))
-            .route("/patients/{name}/answer", web::get().to(handlers::get_answer))
+            .route("/patients/{name}/metadata", web::get().to(handlers::get_metadata))
             // Serve the frontend folder at /
             // index_file("index.html") makes / load index.html automatically
             .service(Files::new("/", "../frontend").index_file("index.html"))
