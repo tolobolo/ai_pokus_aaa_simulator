@@ -9,8 +9,12 @@ let canvasImage = null;
 // Points placed by the user: array of {x, y}, max length 2.
 let userPoints = [];
 
-// Answer points fetched from the backend, or null if not yet loaded.
-let answerPoints = null;
+// Metadata fetched from the backend when entering page 2.
+// Contains x1/y1/x2/y2 (answer), element_spacing, dim_size, etc.
+let currentMetadata = null;
+
+// Whether the user has clicked "Show answer" on the current image.
+let showingAnswer = false;
 
 // ---------------------------------------------------------------------------
 // Navigation
@@ -75,12 +79,16 @@ async function loadImagePage(name) {
 
   // Reset state from any previous patient
   userPoints = [];
-  answerPoints = null;
+  currentMetadata = null;
+  showingAnswer = false;
 
-  // Fetch the image and draw it on the canvas
-  const url = `${API}/patients/${name}/image`;
+  // Fetch metadata (contains spacing and answer coordinates)
+  const metaResponse = await fetch(`${API}/patients/${name}/metadata`);
+  currentMetadata = await metaResponse.json();
+
+  // Fetch and draw the image
   const image = new Image();
-  image.src = url;
+  image.src = `${API}/patients/${name}/image`;
   image.onload = () => {
     canvasImage = image;
     const canvas = document.getElementById("image-canvas");
@@ -93,29 +101,34 @@ async function loadImagePage(name) {
   showPage(2);
 }
 
-// Returns Euclidean distance between two points as a percentage of the
-// image diagonal (= the longest possible line in the image, i.e. 100%).
-function distancePct(ax, ay, bx, by) {
-  const dist = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
-  return ((dist / canvasImage.naturalWidth) * 100).toFixed(1);
+// ---------------------------------------------------------------------------
+// Distance calculation
+// ---------------------------------------------------------------------------
+
+// Returns the Euclidean distance between two canvas points converted to mm,
+// using ElementSpacing from the metadata (mm per pixel).
+// ElementSpacing is stored as a string like "0.217599 0.217599"; we use the
+// first value (x-axis spacing).
+function distanceMm(ax, ay, bx, by) {
+  const distPx = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+  const spacing = parseFloat(currentMetadata.element_spacing.split(" ")[0]);
+  return (distPx * spacing).toFixed(1);
 }
+
+// ---------------------------------------------------------------------------
+// Canvas fit and draw
+// ---------------------------------------------------------------------------
 
 // Set the canvas CSS dimensions to the largest size that fits its wrapper
 // while preserving the image aspect ratio.
-// The canvas pixel coordinate system (canvas.width/height) stays at the
-// image's natural dimensions, so the click scaling math stays correct.
 function fitCanvas() {
   if (!canvasImage) return;
 
   const canvas = document.getElementById("image-canvas");
   const wrapper = canvas.parentElement;
 
-  const wrapperW = wrapper.clientWidth;
-  const wrapperH = wrapper.clientHeight;
-
-  // How much do we need to scale down to fit inside the wrapper?
-  const scale = Math.min(wrapperW / canvasImage.naturalWidth,
-                         wrapperH / canvasImage.naturalHeight);
+  const scale = Math.min(wrapper.clientWidth  / canvasImage.naturalWidth,
+                         wrapper.clientHeight / canvasImage.naturalHeight);
 
   canvas.style.width  = Math.round(canvasImage.naturalWidth  * scale) + "px";
   canvas.style.height = Math.round(canvasImage.naturalHeight * scale) + "px";
@@ -134,33 +147,27 @@ function redraw() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw the background image
-  if (canvasImage) {
-    ctx.drawImage(canvasImage, 0, 0);
-  }
+  if (canvasImage) ctx.drawImage(canvasImage, 0, 0);
 
-  // Draw the user's points and line in blue
+  // User's points and line in blue
   ctx.fillStyle = "#3a6df0";
   ctx.strokeStyle = "#3a6df0";
   ctx.lineWidth = 2;
   userPoints.forEach((p) => drawDot(ctx, p.x, p.y));
-  if (userPoints.length === 2) {
-    drawLine(ctx, userPoints[0], userPoints[1]);
-  }
+  if (userPoints.length === 2) drawLine(ctx, userPoints[0], userPoints[1]);
 
-  // Draw the answer points and line in red (if "Show answer" was clicked)
-  if (answerPoints) {
-    const p1 = { x: answerPoints.x1, y: answerPoints.y1 };
-    const p2 = { x: answerPoints.x2, y: answerPoints.y2 };
+  // Answer points and line in red (only after "Show answer" is clicked)
+  if (showingAnswer && currentMetadata) {
     ctx.fillStyle = "#e74c3c";
     ctx.strokeStyle = "#e74c3c";
     ctx.lineWidth = 2;
-    drawDot(ctx, p1.x, p1.y);
-    drawDot(ctx, p2.x, p2.y);
-    drawLine(ctx, p1, p2);
+    const a = { x: currentMetadata.x1, y: currentMetadata.y1 };
+    const b = { x: currentMetadata.x2, y: currentMetadata.y2 };
+    drawDot(ctx, a.x, a.y);
+    drawDot(ctx, b.x, b.y);
+    drawLine(ctx, a, b);
   }
 
-  // Update distance labels below the canvas
   updateDistanceDisplay();
 }
 
@@ -170,26 +177,26 @@ function updateDistanceDisplay() {
   const answerLabel = document.getElementById("answer-distance");
 
   const hasUserLine = userPoints.length === 2;
-  const hasAnswer = answerPoints !== null;
 
-  if (!hasUserLine && !hasAnswer) {
+  if (!hasUserLine && !showingAnswer) {
     display.classList.add("hidden");
     return;
   }
 
   display.classList.remove("hidden");
 
-  if (hasUserLine) {
-    const pct = distancePct(userPoints[0].x, userPoints[0].y, userPoints[1].x, userPoints[1].y);
-    userLabel.textContent = `Your line: ${pct}%`;
+  if (hasUserLine && currentMetadata) {
+    const mm = distanceMm(userPoints[0].x, userPoints[0].y, userPoints[1].x, userPoints[1].y);
+    userLabel.textContent = `Your line: ${mm} mm`;
     userLabel.classList.remove("hidden");
   } else {
     userLabel.classList.add("hidden");
   }
 
-  if (hasAnswer) {
-    const pct = distancePct(answerPoints.x1, answerPoints.y1, answerPoints.x2, answerPoints.y2);
-    answerLabel.textContent = `Answer: ${pct}%`;
+  if (showingAnswer && currentMetadata) {
+    const mm = distanceMm(currentMetadata.x1, currentMetadata.y1,
+                          currentMetadata.x2, currentMetadata.y2);
+    answerLabel.textContent = `Answer: ${mm} mm`;
     answerLabel.classList.remove("hidden");
   } else {
     answerLabel.classList.add("hidden");
@@ -211,7 +218,7 @@ function drawLine(ctx, a, b) {
 
 // Handle clicks on the canvas: place up to two points.
 document.getElementById("image-canvas").addEventListener("click", (event) => {
-  if (userPoints.length >= 2) return; // already have two points
+  if (userPoints.length >= 2) return;
 
   const canvas = document.getElementById("image-canvas");
   const rect = canvas.getBoundingClientRect();
@@ -236,13 +243,13 @@ document.getElementById("btn-to-image").addEventListener("click", () => {
 
 document.getElementById("btn-reset").addEventListener("click", () => {
   userPoints = [];
-  answerPoints = null;
+  showingAnswer = false;
   redraw();
 });
 
-document.getElementById("btn-show-answer").addEventListener("click", async () => {
-  const response = await fetch(`${API}/patients/${currentPatient}/metadata`);
-  answerPoints = await response.json();
+document.getElementById("btn-show-answer").addEventListener("click", () => {
+  // Metadata is already loaded — just reveal the answer
+  showingAnswer = true;
   redraw();
 });
 
