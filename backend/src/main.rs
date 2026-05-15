@@ -11,8 +11,9 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let data_dir = "data".to_string();
+    let addr = "0.0.0.0:9090";
 
-    println!("Server running at http://127.0.0.1:8080");
+    println!("Server running at http://{addr}");
 
     HttpServer::new(move || {
         let state = web::Data::new(AppState {
@@ -30,7 +31,7 @@ async fn main() -> std::io::Result<()> {
             // index_file("index.html") makes / load index.html automatically
             .service(Files::new("/", "../frontend").index_file("index.html"))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(addr)?
     .run()
     .await
 }

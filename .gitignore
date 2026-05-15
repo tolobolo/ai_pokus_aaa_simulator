@@ -1,5 +1,5 @@
 backend/target
 *.mp4
 *.png
-
+*.json
 original_data
