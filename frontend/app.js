@@ -3,6 +3,9 @@ const API = "";
 // The patient selected on page 0; used on pages 1 and 2.
 let currentPatient = null;
 
+// Display label for the current patient, e.g. "Patient 3".
+let currentPatientLabel = null;
+
 // The image drawn on the canvas (HTMLImageElement).
 let canvasImage = null;
 
@@ -44,16 +47,18 @@ async function loadPatients() {
 
   empty.classList.add("hidden");
 
-  data.patients.forEach((name) => {
+  data.patients.forEach((name, index) => {
+    const label = `Patient ${index + 1}`;
     const item = document.createElement("li");
-    item.textContent = name;
-    item.addEventListener("click", () => selectPatient(name));
+    item.textContent = label;
+    item.addEventListener("click", () => selectPatient(name, label));
     list.appendChild(item);
   });
 }
 
-function selectPatient(name) {
+function selectPatient(name, label) {
   currentPatient = name;
+  currentPatientLabel = label;
   loadVideo(name);
   showPage(1);
 }
@@ -63,7 +68,7 @@ function selectPatient(name) {
 // ---------------------------------------------------------------------------
 
 function loadVideo(name) {
-  document.getElementById("video-title").textContent = name;
+  document.getElementById("video-title").textContent = currentPatientLabel;
 
   const video = document.getElementById("video-player");
   video.src = `${API}/patients/${name}/video`;
@@ -75,7 +80,7 @@ function loadVideo(name) {
 // ---------------------------------------------------------------------------
 
 async function loadImagePage(name) {
-  document.getElementById("image-title").textContent = name;
+  document.getElementById("image-title").textContent = currentPatientLabel;
 
   // Reset state from any previous patient
   userPoints = [];
