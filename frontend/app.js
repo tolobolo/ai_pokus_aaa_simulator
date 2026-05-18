@@ -127,10 +127,12 @@ function fitCanvas() {
   const canvas = document.getElementById("image-canvas");
   const wrapper = canvas.parentElement;
 
-  const scale = Math.min(wrapper.clientWidth  / canvasImage.naturalWidth,
-                         wrapper.clientHeight / canvasImage.naturalHeight);
+  const scale = Math.min(
+    wrapper.clientWidth / canvasImage.naturalWidth,
+    wrapper.clientHeight / canvasImage.naturalHeight,
+  );
 
-  canvas.style.width  = Math.round(canvasImage.naturalWidth  * scale) + "px";
+  canvas.style.width = Math.round(canvasImage.naturalWidth * scale) + "px";
   canvas.style.height = Math.round(canvasImage.naturalHeight * scale) + "px";
 }
 
@@ -168,7 +170,20 @@ function redraw() {
     drawLine(ctx, a, b);
   }
 
+  updateInstructions();
   updateDistanceDisplay();
+}
+
+function updateInstructions() {
+  const el = document.getElementById("instructions");
+  if (userPoints.length === 0) {
+    el.textContent = "Click on the image to place point 1";
+  } else if (userPoints.length === 1) {
+    el.textContent = "Click on the image to place point 2";
+  } else {
+    el.textContent =
+      "Both points placed — press Reset to start over, or click Show answer";
+  }
 }
 
 function updateDistanceDisplay() {
@@ -186,7 +201,12 @@ function updateDistanceDisplay() {
   display.classList.remove("hidden");
 
   if (hasUserLine && currentMetadata) {
-    const mm = distanceMm(userPoints[0].x, userPoints[0].y, userPoints[1].x, userPoints[1].y);
+    const mm = distanceMm(
+      userPoints[0].x,
+      userPoints[0].y,
+      userPoints[1].x,
+      userPoints[1].y,
+    );
     userLabel.textContent = `Your line: ${mm} mm`;
     userLabel.classList.remove("hidden");
   } else {
@@ -194,8 +214,12 @@ function updateDistanceDisplay() {
   }
 
   if (showingAnswer && currentMetadata) {
-    const mm = distanceMm(currentMetadata.x1, currentMetadata.y1,
-                          currentMetadata.x2, currentMetadata.y2);
+    const mm = distanceMm(
+      currentMetadata.x1,
+      currentMetadata.y1,
+      currentMetadata.x2,
+      currentMetadata.y2,
+    );
     answerLabel.textContent = `Answer: ${mm} mm`;
     answerLabel.classList.remove("hidden");
   } else {
