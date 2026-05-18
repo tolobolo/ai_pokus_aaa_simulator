@@ -1,51 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ai-aaa</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AI-aaa</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <!-- PAGE 0: list of patients -->
+        <div id="page-0" class="page">
+            <h1>Patients</h1>
+            <ul id="patient-list"></ul>
+            <p id="no-patients" class="hidden">
+                No patients found. Add folders to <code>data/</code>.
+            </p>
+        </div>
 
-  <!-- PAGE 0: list of patients -->
-  <div id="page-0" class="page">
-    <h1>Patients</h1>
-    <ul id="patient-list"></ul>
-    <p id="no-patients" class="hidden">No patients found. Add folders to <code>data/</code>.</p>
-  </div>
+        <!-- PAGE 1: video -->
+        <div id="page-1" class="page hidden">
+            <h1 id="video-title"></h1>
+            <div class="media-wrapper">
+                <video id="video-player" controls></video>
+            </div>
+            <div class="actions">
+                <button id="btn-to-image">Next →</button>
+            </div>
+        </div>
 
-  <!-- PAGE 1: video -->
-  <div id="page-1" class="page hidden">
-    <h1 id="video-title"></h1>
-    <div class="media-wrapper">
-      <video id="video-player" controls></video>
-    </div>
-    <div class="actions">
-      <button id="btn-to-image">Next →</button>
-    </div>
-  </div>
+        <!-- PAGE 2: image with point selection -->
+        <div id="page-2" class="page hidden">
+            <h1 id="image-title"></h1>
+            <div class="media-wrapper">
+                <canvas id="image-canvas"></canvas>
+            </div>
+            <div class="image-footer">
+                <p id="instructions" class="hint"></p>
+                <div id="distance-display" class="hidden">
+                    <span id="user-distance"></span>
+                    <span id="answer-distance"></span>
+                </div>
+                <div class="actions">
+                    <button id="btn-reset">Reset points</button>
+                    <button id="btn-show-answer">Show answer</button>
+                    <button id="btn-next-patient">Next patient</button>
+                </div>
+            </div>
+        </div>
 
-  <!-- PAGE 2: image with point selection -->
-  <div id="page-2" class="page hidden">
-    <h1 id="image-title"></h1>
-    <div class="media-wrapper">
-      <canvas id="image-canvas"></canvas>
-    </div>
-    <div class="image-footer">
-      <p id="instructions" class="hint"></p>
-      <div id="distance-display" class="hidden">
-        <span id="user-distance"></span>
-        <span id="answer-distance"></span>
-      </div>
-      <div class="actions">
-        <button id="btn-reset">Reset points</button>
-        <button id="btn-show-answer">Show answer</button>
-        <button id="btn-next-patient">Next patient</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
+        <script src="app.js"></script>
+    </body>
 </html>
