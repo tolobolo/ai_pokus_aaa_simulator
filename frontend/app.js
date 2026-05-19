@@ -175,20 +175,7 @@ function redraw() {
     drawLine(ctx, a, b);
   }
 
-  updateInstructions();
   updateDistanceDisplay();
-}
-
-function updateInstructions() {
-  const el = document.getElementById("instructions");
-  if (userPoints.length === 0) {
-    el.textContent = "Click on the image to place point 1";
-  } else if (userPoints.length === 1) {
-    el.textContent = "Click on the image to place point 2";
-  } else {
-    el.textContent =
-      "Both points placed — press Reset to start over, or click Show answer";
-  }
 }
 
 function updateDistanceDisplay() {

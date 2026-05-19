@@ -43,6 +43,36 @@ h1 {
   color: #1a1a2e;
 }
 
+/* Page header: title block on the left, Next-patient button on the right */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page-header h1 {
+  margin-bottom: 0;
+}
+
+/* Patient label small in the top-left */
+#image-title,
+#video-title {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* Static task title under the patient label */
+.task-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.3;
+}
+
 /* --- Page 0: patient list --- */
 
 #patient-list {
@@ -93,45 +123,47 @@ h1 {
   cursor: crosshair;
 }
 
-/* Footer below the canvas: three equal columns — instructions | distance | buttons */
-.image-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-  margin-top: 12px;
-  gap: 8px;
+/* Image area: canvas on the left, side panel (distance + buttons) on the right */
+.image-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 16px;
 }
 
-.hint {
-  color: #111;
-  font-size: 1.1rem;
-  font-weight: 600;
+.side-panel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-panel .actions {
+  margin-top: 0;
+  justify-content: flex-end;
 }
 
 #distance-display {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 1rem;
-  font-weight: bold;
+  justify-content: center;
   text-align: center;
+  gap: 6px;
+  font-size: 1.3rem;
+  font-weight: bold;
 }
 
-#user-distance   { color: #3a6df0; }
-#answer-distance { color: #e74c3c; }
-
-/* Keep distance-display in the grid even when "hidden", so buttons stay right-aligned */
+/* Keep distance-display in the column even when empty, so the buttons stay at the bottom */
 #distance-display.hidden {
   visibility: hidden;
   display: flex !important;
 }
 
-/* Buttons always sit in the right column, aligned to the right edge */
-.image-footer .actions {
-  margin-top: 0;
-  justify-content: flex-end;
-}
+#user-distance   { color: #3a6df0; }
+#answer-distance { color: #e74c3c; }
 
 /* --- Shared button row --- */
 

@@ -18,7 +18,12 @@
 
         <!-- PAGE 1: video -->
         <div id="page-1" class="page hidden">
-            <h1 id="video-title"></h1>
+            <div class="page-header">
+                <div class="title-block">
+                    <h1 id="video-title"></h1>
+                    <h2 class="task-title">Watch the video</h2>
+                </div>
+            </div>
             <div class="media-wrapper">
                 <video id="video-player" controls></video>
             </div>
@@ -29,20 +34,29 @@
 
         <!-- PAGE 2: image with point selection -->
         <div id="page-2" class="page hidden">
-            <h1 id="image-title"></h1>
-            <div class="media-wrapper">
-                <canvas id="image-canvas"></canvas>
-            </div>
-            <div class="image-footer">
-                <p id="instructions" class="hint"></p>
-                <div id="distance-display" class="hidden">
-                    <span id="user-distance"></span>
-                    <span id="answer-distance"></span>
+            <div class="page-header">
+                <div class="title-block">
+                    <h1 id="image-title"></h1>
+                    <h2 class="task-title">
+                        Measure the biggest diameter of the aorta by clicking
+                        two points.
+                    </h2>
                 </div>
-                <div class="actions">
-                    <button id="btn-reset">Reset points</button>
-                    <button id="btn-show-answer">Show answer</button>
-                    <button id="btn-next-patient">Next patient</button>
+                <button id="btn-next-patient">Next patient</button>
+            </div>
+            <div class="image-body">
+                <div class="media-wrapper">
+                    <canvas id="image-canvas"></canvas>
+                </div>
+                <div class="side-panel">
+                    <div id="distance-display" class="hidden">
+                        <span id="user-distance"></span>
+                        <span id="answer-distance"></span>
+                    </div>
+                    <div class="actions">
+                        <button id="btn-reset">Reset points</button>
+                        <button id="btn-show-answer">Show answer</button>
+                    </div>
                 </div>
             </div>
         </div>
